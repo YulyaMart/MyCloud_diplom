@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+from django.core.files.storage import FileSystemStorage
 
 
 # Модель пользователя
@@ -56,6 +57,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
 # Модель файла    
 
+file_system = FileSystemStorage(location='storage')
+
 class FileModel(models.Model):
     id = models.AutoField(primary_key=True, unique=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE, verbose_name='Владелец файла')
@@ -64,9 +67,8 @@ class FileModel(models.Model):
     date_upload = models.DateField(auto_now_add=True, null=True, verbose_name='Дата загрузки')
     date_last_download = models.DateField(null=True, verbose_name='Дата последнего скачивания')
     comment = models.TextField(max_length=500, null=True, blank=True, verbose_name='Комментарий')
-    file_path = models.CharField(db_index=True, max_length=500, verbose_name="Путь к файлу")
-    external_file_path = models.URLField(blank=True, verbose_name='Cсылка на файл')
-    # file_path = models.FileField(upload_to=get_user_directory_path)
+    file_path = models.FileField(storage=file_system, blank=True, verbose_name="Путь к файлу")
+    external_file_path = models.CharField(unique=True, max_length=50, verbose_name='Cсылка на файл')
     
     def __str__(self):
         return self.file_name
